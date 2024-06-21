@@ -1,17 +1,17 @@
 <template>
   <div class="title-container">
     <div
-        class="title"
-        @mouseover="showFullTitle"
-        @mousemove="updateTooltipPosition"
-        @mouseleave="hideFullTitle"
+      class="title"
+      @mouseover="showFullTitle"
+      @mousemove="updateTooltipPosition"
+      @mouseleave="hideFullTitle"
     >
       {{ title }}
     </div>
     <div
-        class="tooltip"
-        v-if="tooltipVisible"
-        :style="{ top: tooltipPosition.top + 'px', left: tooltipPosition.left + 'px' }"
+      class="tooltip"
+      v-if="tooltipVisible"
+      :style="{ top: tooltipPosition.top + 'px', left: tooltipPosition.left + 'px' }"
     >
       {{ title }}
     </div>
@@ -20,7 +20,6 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { defineProps } from 'vue'
 
 defineProps({
   title: {
@@ -47,7 +46,6 @@ const hideFullTitle = () => {
   tooltipVisible.value = false
 }
 </script>
-
 <style lang="scss" scoped>
 .title-container {
   position: relative;
@@ -73,5 +71,3 @@ const hideFullTitle = () => {
   white-space: nowrap;
 }
 </style>
-
-

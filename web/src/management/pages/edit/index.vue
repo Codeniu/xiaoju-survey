@@ -14,8 +14,8 @@
   </div>
 </template>
 <script setup lang="ts">
-import { onMounted } from 'vue'
-import { useStore } from 'vuex'
+import { onMounted, watch } from 'vue'
+import { useEditStore } from '@/management/stores/edit'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import 'element-plus/theme-chalk/src/message.scss'
@@ -24,18 +24,47 @@ import LeftMenu from '@/management/components/LeftMenu.vue'
 import CommonTemplate from './components/CommonTemplate.vue'
 import Navbar from './components/ModuleNavbar.vue'
 
-import { initShowLogicEngine } from '@/management/hooks/useShowLogicEngine'
+const editStore = useEditStore()
+const { init, setSurveyId, schema } = editStore
 
-const store = useStore()
 const router = useRouter()
 const route = useRoute()
 
+watch(
+  () => schema.skinConf,
+  (skinConfig) => {
+    const root = document.documentElement
+    const { themeConf, backgroundConf, contentConf } = skinConfig
+
+    if (themeConf?.color) {
+      // 设置主题颜色
+      root.style.setProperty('--primary-color', themeConf?.color)
+    }
+
+    // 设置背景
+    const { color, type, image } = backgroundConf || {}
+    root.style.setProperty(
+      '--primary-background',
+      type === 'image' ? `url(${image}) no-repeat center / cover` : color
+    )
+
+    if (contentConf?.opacity.toString()) {
+      // 设置全局透明度
+      root.style.setProperty('--opacity', `${contentConf.opacity / 100}`)
+    }
+  },
+  {
+    deep: true,
+    immediate: true
+  }
+)
+
 onMounted(async () => {
-  store.commit('edit/setSurveyId', route.params.id)
+  const surveyId = route.params.id as string
+  setSurveyId(surveyId)
 
   try {
-    await store.dispatch('edit/init')
-    await initShowLogicEngine(store.state.edit.schema.logicConf.showLogicConf || {})
+    await init()
   } catch (err: any) {
     ElMessage.error(err.message)
 
@@ -59,7 +88,7 @@ onMounted(async () => {
   }
 
   .right {
-    min-width: 1160px;
+    min-width: 1300px;
     height: 100%;
     padding-left: 80px;
     overflow: hidden;

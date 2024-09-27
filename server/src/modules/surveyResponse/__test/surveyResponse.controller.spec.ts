@@ -13,7 +13,7 @@ import { ClientEncryptService } from '../services/clientEncrypt.service';
 import { MessagePushingTaskService } from 'src/modules/message/services/messagePushingTask.service';
 
 import { PluginManagerProvider } from 'src/securityPlugin/pluginManager.provider';
-import { XiaojuSurveyPluginManager } from 'src/securityPlugin/pluginManager';
+import { PluginManager } from 'src/securityPlugin/pluginManager';
 import { HttpException } from 'src/exceptions/httpException';
 import { SurveyNotFoundException } from 'src/exceptions/surveyNotFoundException';
 import { ResponseSecurityPlugin } from 'src/securityPlugin/responseSecurityPlugin';
@@ -21,6 +21,10 @@ import { ResponseSecurityPlugin } from 'src/securityPlugin/responseSecurityPlugi
 import { RECORD_STATUS } from 'src/enums';
 import { SurveyResponse } from 'src/models/surveyResponse.entity';
 import { Logger } from 'src/logger';
+import { ResponseSchema } from 'src/models/responseSchema.entity';
+import { EXCEPTION_CODE } from 'src/enums/exceptionCode';
+import { UserService } from 'src/modules/auth/services/user.service';
+import { WorkspaceMemberService } from 'src/modules/workspace/services/workspaceMember.service';
 
 const mockDecryptErrorBody = {
   surveyPath: 'EBzdmnSp',
@@ -28,11 +32,11 @@ const mockDecryptErrorBody = {
     'SkyfsbS6MDvFrrxFJQDMxsvm53G3PTURktfZikJP2fKilC8wPW5ZdfX29Fixor5ldHBBNyILsDtxhbNahEbNCDw8n1wS8IIckFuQcaJtn6MLOD+h+Iuywka3ig4ecTN87RpdcfEQe7f38rSSx0zoFU8j37eojjSF7eETBSrz5m9WaNesQo4hhC6p7wmAo1jggkdbG8PVrFqrZPbkHN5jOBrzQEqdqYu9A5wHMM7nUteqlPpkiogEDYmBIccqmPdtO54y7LoPslXgXj6jNja8oVNaYlnp7UsisT+i5cuQ7lbDukEhrfpAIFRsT2IUwVlLjWHtFQm4/4I5HyvVBirTng==',
     'IMn0E7R6cYCQPI497mz3x99CPA4cImAFEfIv8Q98Gm5bFcgKJX6KFYS7PF/VtIuI1leKwwNYexQy7+2HnF40by/huVugoPYnPd4pTpUdG6f1kh8EpzIir2+8P98Dcz2+NZ/khP2RIAM8nOr+KSC99TNGhuKaKQCItyLFDkr80s3zv+INieGc8wULIrGoWDJGN2KdU/jSq+hkV0QXypd81N5IyAoNhZLkZeM/FU6grGFPnGRtcDDc5W8YWVHO87VymlxPCTRawXRTDcvGIUqb3GuZfxvA7AULqbspmN9kzt3rktuZLNb2TFQDsJfqUuCmi+b28qP/G4OrT9/VAHhYKw==',
   ],
-  difTime: 806707,
+  diffTime: 806707,
   clientTime: 1710400229573,
   encryptType: 'rsa',
   sessionId: '65f2664c92862d6a9067ad18',
-  sign: '8c9ca8804c9d94de6055d68a1f3c423fe50c95b4bd69f809ee2da8fcd82fd960.1710400229589',
+  sign: '95d6ff5dd3d9ddc205cbab88defe40ebe889952961f1d60e760fa411e2cb39fe.1710400229589',
 };
 
 const mockSubmitData = {
@@ -41,11 +45,11 @@ const mockSubmitData = {
     'SkyfsbS6MDvFrrxFJQDMxsvm53G3PTURktfZikJP2fKilC8wPW5ZdfX29Fixor5ldHBBNyILsDtxhbNahEbNCDw8n1wS8IIckFuQcaJtn6MLOD+h+Iuywka3ig4ecTN87RpdcfEQe7f38rSSx0zoFU8j37eojjSF7eETBSrz5m9WaNesQo4hhC6p7wmAo1jggkdbG8PVrFqrZPbkHN5jOBrzQEqdqYu9A5wHMM7nUteqlPpkiogEDYmBIccqmPdtO54y7LoPslXgXj6jNja8oVNaYlnp7UsisT+i5cuQ7lbDukEhrfpAIFRsT2IUwVlLjWHtFQm4/4I5HyvVBirTng==',
     'IMn0E7R6cYCQPI497mz3x99CPA4cImAFEfIv8Q98Gm5bFcgKJX6KFYS7PF/VtIuI1leKwwNYexQy7+2HnF40by/huVugoPYnPd4pTpUdG6f1kh8EpzIir2+8P98Dcz2+NZ/khP2RIAM8nOr+KSC99TNGhuKaKQCItyLFDkr80s3zv+INieGc8wULIrGoWDJGN2KdU/jSq+hkV0QXypd81N5IyAoNhZLkZeM/FU6grGFPnGRtcDDc5W8YWVHO87VymlxPCTRawXRTDcvGIUqb3GuZfxvA7AULqbspmN9kzt3rktuZLNb2TFQDsJfqUuCmi+b28qP/G4OrT9/VAHhYKw==',
   ],
-  difTime: 806707,
+  diffTime: 806707,
   clientTime: 1710400229573,
   encryptType: 'rsa',
   sessionId: '65f29fc192862d6a9067ad28',
-  sign: '8c9ca8804c9d94de6055d68a1f3c423fe50c95b4bd69f809ee2da8fcd82fd960.1710400229589',
+  sign: '95d6ff5dd3d9ddc205cbab88defe40ebe889952961f1d60e760fa411e2cb39fe.1710400229589',
 };
 
 const mockClientEncryptInfo = {
@@ -124,6 +128,18 @@ describe('SurveyResponseController', () => {
             info: jest.fn(),
           },
         },
+        {
+          provide: UserService,
+          useValue: {
+            getUserByUsername: jest.fn(),
+          },
+        },
+        {
+          provide: WorkspaceMemberService,
+          useValue: {
+            findAllByUserId: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
@@ -137,9 +153,7 @@ describe('SurveyResponseController', () => {
     clientEncryptService =
       module.get<ClientEncryptService>(ClientEncryptService);
 
-    const pluginManager = module.get<XiaojuSurveyPluginManager>(
-      XiaojuSurveyPluginManager,
-    );
+    const pluginManager = module.get<PluginManager>(PluginManager);
     pluginManager.registerPlugin(
       new ResponseSecurityPlugin('dataAesEncryptSecretKey'),
     );
@@ -169,7 +183,7 @@ describe('SurveyResponseController', () => {
             status: RECORD_STATUS.NEW,
             date: 1711025113146,
           },
-          difTime: 30518,
+          diffTime: 30518,
           data: {
             data458: '15000000000',
             data515: '115019',
@@ -205,7 +219,7 @@ describe('SurveyResponseController', () => {
         .spyOn(clientEncryptService, 'deleteEncryptInfo')
         .mockResolvedValueOnce(undefined);
 
-      const result = await controller.createResponse(reqBody, {});
+      const result = await controller.createResponse(reqBody);
 
       expect(result).toEqual({ code: 200, msg: '提交成功' });
       expect(
@@ -224,7 +238,7 @@ describe('SurveyResponseController', () => {
           data770: '123456@qq.com',
         },
         clientTime: reqBody.clientTime,
-        difTime: reqBody.difTime,
+        diffTime: reqBody.diffTime,
         surveyId: mockResponseSchema.pageId,
         optionTextAndId: {
           data515: [
@@ -252,7 +266,7 @@ describe('SurveyResponseController', () => {
         .spyOn(responseSchemaService, 'getResponseSchemaByPath')
         .mockResolvedValueOnce(null);
 
-      await expect(controller.createResponse(reqBody, {})).rejects.toThrow(
+      await expect(controller.createResponse(reqBody)).rejects.toThrow(
         SurveyNotFoundException,
       );
     });
@@ -261,7 +275,7 @@ describe('SurveyResponseController', () => {
       const reqBody = cloneDeep(mockSubmitData);
       delete reqBody.sign;
 
-      await expect(controller.createResponse(reqBody, {})).rejects.toThrow(
+      await expect(controller.createResponse(reqBody)).rejects.toThrow(
         HttpException,
       );
 
@@ -274,7 +288,7 @@ describe('SurveyResponseController', () => {
       const reqBody = cloneDeep(mockDecryptErrorBody);
       reqBody.sign = 'mock sign';
 
-      await expect(controller.createResponse(reqBody, {})).rejects.toThrow(
+      await expect(controller.createResponse(reqBody)).rejects.toThrow(
         HttpException,
       );
 
@@ -290,7 +304,7 @@ describe('SurveyResponseController', () => {
         .spyOn(responseSchemaService, 'getResponseSchemaByPath')
         .mockResolvedValueOnce(mockResponseSchema);
 
-      await expect(controller.createResponse(reqBody, {})).rejects.toThrow(
+      await expect(controller.createResponse(reqBody)).rejects.toThrow(
         HttpException,
       );
     });
@@ -302,8 +316,34 @@ describe('SurveyResponseController', () => {
         .spyOn(responseSchemaService, 'getResponseSchemaByPath')
         .mockResolvedValueOnce(mockResponseSchema);
 
-      await expect(controller.createResponse(reqBody, {})).rejects.toThrow(
+      await expect(controller.createResponse(reqBody)).rejects.toThrow(
         HttpException,
+      );
+    });
+
+    it('should throw HttpException if password does not match', async () => {
+      const reqBody = {
+        ...mockSubmitData,
+        password: '123457',
+        sign: '145595d85079af3b1fb30784177c348555f442837c051d90f57a01ce1ff53c32.1710400229589',
+      };
+
+      jest
+        .spyOn(responseSchemaService, 'getResponseSchemaByPath')
+        .mockResolvedValueOnce({
+          curStatus: {
+            status: RECORD_STATUS.PUBLISHED,
+          },
+          code: {
+            baseConf: {
+              passwordSwitch: true,
+              password: '123456',
+            },
+          },
+        } as ResponseSchema);
+
+      await expect(controller.createResponse(reqBody)).rejects.toThrow(
+        new HttpException('白名单验证失败', EXCEPTION_CODE.WHITELIST_ERROR),
       );
     });
   });

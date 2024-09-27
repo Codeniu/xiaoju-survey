@@ -1,6 +1,7 @@
-import store from '../store/index'
+import { useSurveyStore } from '../stores/survey'
 import { computed } from 'vue'
 export const useProgressBar = () => {
+  const surveyStore = useSurveyStore()
   const isVariableEmpty = (variable) => {
     if (variable === undefined || variable === null) {
       return true
@@ -22,7 +23,7 @@ export const useProgressBar = () => {
       fillCount: 0,
       topicCount: 0
     }
-    const formValues = store.state.formValues
+    const formValues = surveyStore.formValues
     for (let key in formValues) {
       if (key.split('_').length > 1) continue
 
@@ -37,7 +38,7 @@ export const useProgressBar = () => {
 
   const percent = computed(() => {
     const { fillCount, topicCount } = surveySchedule.value
-    return Math.floor((100 / topicCount) * fillCount) + '%'
+    return Math.floor((100 / topicCount) * fillCount) || 0 + '%'
   })
 
   return { surveySchedule, percent }

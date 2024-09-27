@@ -9,7 +9,7 @@ const myxss = new xss.FilterXSS({
   },
   onIgnoreTag(tag, html) {
     // <xxx>过滤为空，否则不过滤为空
-    var re1 = new RegExp('<.+?>', 'g')
+    const re1 = new RegExp('<.+?>', 'g')
     if (re1.test(html)) {
       return ''
     } else {
@@ -25,6 +25,18 @@ const isImg = (html) => {
 const isVideo = (html) => {
   html = html + ''
   return html.indexOf('<video') > -1
+}
+
+export const cleanRichTextWithMediaTag = (text) => {
+  if (!text) {
+    return text === 0 ? 0 : ''
+  }
+  const html = transformHtmlTag(text)
+    .replace(/<img([\w\W]+?)\/>/g, '[图片]')
+    .replace(/<video.*\/video>/g, '[视频]')
+  const content = html.replace(/<[^<>]+>/g, '').replace(/&nbsp;/g, '')
+
+  return content
 }
 
 export const cleanRichText = (text) => {

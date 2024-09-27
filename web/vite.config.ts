@@ -2,7 +2,9 @@ import { fileURLToPath, URL } from 'node:url'
 import { defineConfig, normalizePath } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
+
 import { createMpaPlugin, createPages } from 'vite-plugin-virtual-mpa'
+
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import Icons from 'unplugin-icons/vite'
@@ -59,7 +61,15 @@ export default defineConfig({
       'clipboard',
       'qrcode',
       'moment',
-      'moment/locale/zh-cn'
+      'moment/locale/zh-cn',
+      'echarts',
+      'nanoid',
+      'yup',
+      'crypto-js/sha256',
+      'element-plus/es/locale/lang/zh-cn',
+      'node-forge',
+      '@logicflow/core',
+      '@logicflow/extension'
     ]
   },
   plugins: [
@@ -112,10 +122,44 @@ export default defineConfig({
       '/api': {
         target: 'http://127.0.0.1:3000',
         changeOrigin: true
+      },
+      '/exportfile': {
+        target: 'http://127.0.0.1:3000',
+        changeOrigin: true
+      },
+      // 静态文件的默认存储文件夹
+      '/userUpload': {
+        target: 'http://127.0.0.1:3000',
+        changeOrigin: true
       }
     }
   },
   build: {
-    rollupOptions: {}
+    rollupOptions: {
+      output: {
+        assetFileNames: '[ext]/[name]-[hash].[ext]',
+        chunkFileNames: 'js/[name]-[hash].js',
+        entryFileNames: 'js/[name]-[hash].js',
+        manualChunks(id) {
+          // 建议根据项目生产实际情况进行优化，部分可走cdn或进行小资源包合并
+          if (id.includes('element-plus')) {
+            return 'element-plus'
+          }
+          if (id.includes('wangeditor')) {
+            return 'wangeditor'
+          }
+          if (id.includes('node-forg')) {
+            return 'node-forg'
+          }
+          if (id.includes('echarts')) {
+            return 'echarts'
+          }
+
+          if (id.includes('node_modules')) {
+            return 'packages'
+          }
+        }
+      }
+    }
   }
 })

@@ -1,7 +1,5 @@
 import { defineComponent, ref, computed, onMounted } from 'vue'
 
-import store from '@/management/store'
-
 import OptionEdit from './Options/OptionEdit.vue'
 import OptionEditBar from './Options/OptionEditBar.vue'
 import UseOptionBase from './Options/UseOptionBase'
@@ -10,7 +8,6 @@ export default defineComponent({
   name: 'EditOptions',
   provide() {
     return {
-      currentEditKey: store.getters['edit/currentEditKey'],
       moduleConfig: computed(() => this.moduleConfig)
     }
   },
@@ -24,10 +21,7 @@ export default defineComponent({
       required: true
     }
   },
-  setup(props, { slots }) {
-    const currentEditKey = computed(() => {
-      return store.getters['edit/currentEditKey']
-    })
+  setup(props, { slots, emit }) {
     const getOptions = computed(() => {
       return props.moduleConfig.options
     })
@@ -44,17 +38,16 @@ export default defineComponent({
 
     const handleOptionChange = (value) => {
       const optionKey = `options`
-      const key = `${currentEditKey.value}.${optionKey}`
+      const key = `${optionKey}`
       handleChange({ key, value })
     }
 
     const handleChange = ({ key, value }) => {
-      store.dispatch('edit/changeSchema', { key, value })
+      emit('change', { key, value })
     }
 
-    const hasAdvancedConfig = ref(false)
-    const hasAdvancedRateConfig = ref(false)
     const showOthers = ref(false)
+    const showAdvancedConfig = ref(false)
     const showOptionEdit = ref(true)
     const showOptionEditBar = ref(true)
     onMounted(() => {
@@ -62,17 +55,15 @@ export default defineComponent({
       showOptionEdit.value = optionEdit.show
       showOptionEditBar.value = optionEditBar.show
       showOthers.value = optionEditBar.configure.showOthers
-      hasAdvancedConfig.value = Boolean(optionEditBar.configure.showAdvancedConfig)
-      hasAdvancedRateConfig.value = Boolean(optionEditBar.configure.showAdvancedRateConfig)
+      showAdvancedConfig.value = optionEditBar.configure.showAdvancedConfig
     })
     return {
       slots,
       getOptions,
-      hasAdvancedConfig,
-      hasAdvancedRateConfig,
       showOptionEdit,
       showOptionEditBar,
       showOthers,
+      showAdvancedConfig,
       handleAddOption,
       handleAddOtherOption,
       handleOptionChange,
@@ -98,8 +89,7 @@ export default defineComponent({
             ref="optionEditBar"
             option-list={this.getOptions}
             showOthers={this.showOthers}
-            hasAdvancedConfig={this.hasAdvancedConfig}
-            hasAdvancedRateConfig={this.hasAdvancedRateConfig}
+            showAdvancedConfig={this.showAdvancedConfig}
             onAddOption={this.handleAddOption}
             onAddOther={this.handleAddOtherOption}
             onOptionChange={this.handleOptionChange}

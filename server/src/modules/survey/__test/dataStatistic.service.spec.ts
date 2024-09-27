@@ -11,7 +11,7 @@ import { cloneDeep } from 'lodash';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { RECORD_STATUS } from 'src/enums';
 import { PluginManagerProvider } from 'src/securityPlugin/pluginManager.provider';
-import { XiaojuSurveyPluginManager } from 'src/securityPlugin/pluginManager';
+import { PluginManager } from 'src/securityPlugin/pluginManager';
 import { ResponseSecurityPlugin } from 'src/securityPlugin/responseSecurityPlugin';
 
 describe('DataStatisticService', () => {
@@ -34,9 +34,7 @@ describe('DataStatisticService', () => {
     surveyResponseRepository = module.get<MongoRepository<SurveyResponse>>(
       getRepositoryToken(SurveyResponse),
     );
-    const manager = module.get<XiaojuSurveyPluginManager>(
-      XiaojuSurveyPluginManager,
-    );
+    const manager = module.get<PluginManager>(PluginManager);
     manager.registerPlugin(
       new ResponseSecurityPlugin('dataAesEncryptSecretKey'),
     );
@@ -70,7 +68,7 @@ describe('DataStatisticService', () => {
             data413: 3,
             data863: '109239',
           },
-          difTime: 21278,
+          diffTime: 21278,
           clientTime: 1710340862733.0,
           secretKeys: [],
           optionTextAndId: {
@@ -197,15 +195,14 @@ describe('DataStatisticService', () => {
             data413_3: expect.any(String),
             data413: expect.any(Number),
             data863: expect.any(String),
-            data413_custom: expect.any(String),
-            difTime: expect.any(String),
+            diffTime: expect.any(String),
             createDate: expect.any(String),
           }),
         ]),
       });
     });
 
-    it('should return desensitive table data', async () => {
+    it('should return desensitized table data', async () => {
       const mockSchema = cloneDeep(mockSensitiveResponseSchema);
       const surveyResponseList: Array<SurveyResponse> = [
         {
@@ -221,7 +218,7 @@ describe('DataStatisticService', () => {
               'U2FsdGVkX19bRmf3uEmXAJ/6zXd1Znr3cZsD5v4Nocr2v5XG1taXluz8cohFkDyH',
             data770: 'U2FsdGVkX18ldQMhJjFXO8aerjftZLpFnRQ4/FVcCLI=',
           },
-          difTime: 806707,
+          diffTime: 806707,
           clientTime: 1710400229573.0,
           secretKeys: ['data458', 'data450', 'data405', 'data770'],
           optionTextAndId: {
@@ -304,8 +301,165 @@ describe('DataStatisticService', () => {
             data458: expect.any(String),
             data515: expect.any(String),
             data770: expect.any(String),
-            difTime: expect.any(String),
+            diffTime: expect.any(String),
           }),
+        ]),
+      );
+    });
+  });
+
+  describe('aggregationStatis', () => {
+    it('should return correct aggregation data', async () => {
+      const surveyId = '65afc62904d5db18534c0f78';
+      const mockAggregationResult = {
+        data515: [
+          {
+            count: 1,
+            data: {
+              data515: '115019',
+            },
+          },
+          {
+            count: 1,
+            data: {
+              data515: '115020',
+            },
+          },
+        ],
+        data893: [
+          {
+            count: 1,
+            data: {
+              data893: ['466671'],
+            },
+          },
+          {
+            count: 1,
+            data: {
+              data893: ['466671', '095415'],
+            },
+          },
+        ],
+        data820: [
+          {
+            count: 1,
+            data: {
+              data820: 8,
+            },
+          },
+        ],
+        data549: [
+          {
+            count: 1,
+            data: {
+              data549: 5,
+            },
+          },
+        ],
+      };
+
+      const fieldList = Object.keys(mockAggregationResult);
+
+      jest.spyOn(surveyResponseRepository, 'aggregate').mockReturnValue({
+        next: jest.fn().mockResolvedValue(mockAggregationResult),
+      } as any);
+
+      const result = await service.aggregationStatis({
+        surveyId,
+        fieldList,
+      });
+
+      expect(result).toEqual(
+        expect.arrayContaining([
+          {
+            field: 'data515',
+            data: {
+              aggregation: [
+                {
+                  id: '115019',
+                  count: 1,
+                },
+                {
+                  id: '115020',
+                  count: 1,
+                },
+              ],
+              submitionCount: 2,
+            },
+          },
+          {
+            field: 'data893',
+            data: {
+              aggregation: [
+                {
+                  id: '466671',
+                  count: 2,
+                },
+                {
+                  id: '095415',
+                  count: 1,
+                },
+              ],
+              submitionCount: 2,
+            },
+          },
+          {
+            field: 'data820',
+            data: {
+              aggregation: [
+                {
+                  id: '8',
+                  count: 1,
+                },
+              ],
+              submitionCount: 1,
+            },
+          },
+          {
+            field: 'data549',
+            data: {
+              aggregation: [
+                {
+                  id: '5',
+                  count: 1,
+                },
+              ],
+              submitionCount: 1,
+            },
+          },
+        ]),
+      );
+    });
+
+    it('should return empty aggregation data when no responses', async () => {
+      const surveyId = '65afc62904d5db18534c0f78';
+      const fieldList = ['data458', 'data515'];
+
+      jest.spyOn(surveyResponseRepository, 'aggregate').mockReturnValue({
+        next: jest.fn().mockResolvedValue({}),
+      } as any);
+
+      const result = await service.aggregationStatis({
+        surveyId,
+        fieldList,
+      });
+
+      expect(result).toEqual(
+        expect.arrayContaining([
+          {
+            field: 'data458',
+            data: {
+              aggregation: [],
+              submitionCount: 0,
+            },
+          },
+          {
+            field: 'data515',
+            data: {
+              aggregation: [],
+              submitionCount: 0,
+            },
+          },
         ]),
       );
     });

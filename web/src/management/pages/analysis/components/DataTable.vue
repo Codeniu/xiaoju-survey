@@ -13,16 +13,18 @@
         v-for="item in props.tableData.listHead"
         :key="item.field"
         :prop="item.field"
-        :label="cleanRichText(item.title)"
+        :label="item.title"
         minWidth="200"
       >
         <template #header="scope">
           <div class="table-row-cell">
             <span
+              class="table-row-head"
+              @click="onPreviewImage"
               @mouseover="onPopoverRefOver(scope, 'head')"
               :ref="(el) => (popoverRefMap[scope.column.id] = el)"
+              v-html="item.title"
             >
-              {{ scope.column.label.replace(/&nbsp;/g, '') }}
             </span>
           </div>
         </template>
@@ -31,9 +33,10 @@
             <span
               class="table-row-cell"
               @mouseover="onPopoverRefOver(scope, 'content')"
+              @click="onPreviewImage"
               :ref="(el) => (popoverRefMap[scope.$index + scope.column.property] = el)"
+              v-html="getContent(scope.row[scope.column.property])"
             >
-              {{ getContent(scope.row[scope.column.property]) }}
             </span>
           </div>
         </template>
@@ -41,20 +44,23 @@
     </el-table>
     <el-popover
       ref="popover"
-      popper-style="text-align: center;"
+      popper-style="text-align: center;font-size: 13px;"
       :virtual-ref="popoverVirtualRef"
-      placement="top"
+      placement="bottom"
       trigger="hover"
       virtual-triggering
-      :content="popoverContent"
     >
+      <div v-html="popoverContent"></div>
     </el-popover>
+
+    <ImagePreview :url="previewImageUrl" v-model:visible="showPreviewImage" />
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-import { cleanRichText } from '@/common/xss'
+import ImagePreview from './ImagePreview.vue'
+import { cleanRichTextWithMediaTag } from '@/common/xss'
 
 const props = defineProps({
   tableData: {
@@ -62,30 +68,51 @@ const props = defineProps({
   },
   mainTableLoading: {
     type: Boolean
+  },
+  tableMinHeight: {
+    type: String,
+    default: '620px'
   }
 })
 const popoverRefMap = ref({})
 const popoverVirtualRef = ref()
 const popoverContent = ref('')
 
-const getContent = (value) => {
-  const content = cleanRichText(value)
-  return content === 0 ? 0 : content || '未知'
+const getContent = (content) => {
+  if (Array.isArray(content)) {
+    return content.map((item) => getContent(item)).join(',')
+  }
+  if (content === null || content === undefined) {
+    return ''
+  }
+  if (typeof content !== 'string') {
+    content = content + ''
+  }
+  return cleanRichTextWithMediaTag(content) || '未知'
 }
 const setPopoverContent = (content) => {
   popoverContent.value = content
 }
 const onPopoverRefOver = (scope, type) => {
   let popoverContent
-  if (type == 'head') {
+  if (type === 'head') {
     popoverVirtualRef.value = popoverRefMap.value[scope.column.id]
     popoverContent = scope.column.label.replace(/&nbsp;/g, '')
   }
-  if (type == 'content') {
+  if (type === 'content') {
     popoverVirtualRef.value = popoverRefMap.value[scope.$index + scope.column.property]
     popoverContent = getContent(scope.row[scope.column.property])
   }
   setPopoverContent(popoverContent)
+}
+
+const previewImageUrl = ref('')
+const showPreviewImage = ref(false)
+const onPreviewImage = (e) => {
+  if (e.target.tagName === 'IMG') {
+    previewImageUrl.value = e.target.src
+    showPreviewImage.value = true
+  }
 }
 </script>
 
@@ -93,16 +120,18 @@ const onPopoverRefOver = (scope, type) => {
 .data-table-wrapper {
   position: relative;
   width: 100%;
-  padding-bottom: 20px;
-  min-height: 620px;
+  min-height: v-bind('tableMinHeight');
   background: #fff;
   padding: 10px 20px;
+
   .table-border {
     box-sizing: border-box;
     text-align: center;
   }
+
   :deep(.el-table__header) {
     width: 100%;
+
     .thead-cell .el-table__cell {
       .cell {
         height: 24px;
@@ -111,10 +140,21 @@ const onPopoverRefOver = (scope, type) => {
       }
     }
   }
+
   .table-row-cell {
-    white-space: nowrap; /* 禁止自动换行 */
-    overflow: hidden; /* 超出部分隐藏 */
-    text-overflow: ellipsis; /* 显示省略号 */
+    :deep(img) {
+      height: 23px !important;
+      width: auto !important;
+      object-fit: cover;
+      margin-left: 5px;
+    }
+    :deep(p) {
+      display: flex;
+      align-items: center;
+    }
   }
+}
+:deep(.el-table td.el-table__cell div) {
+  font-size: 13px;
 }
 </style>

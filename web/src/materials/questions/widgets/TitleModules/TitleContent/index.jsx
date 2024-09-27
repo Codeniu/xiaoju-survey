@@ -38,6 +38,7 @@ export default defineComponent({
   },
   setup(props, { slots }) {
     const status = ref('')
+    const moduleTitleRef = ref()
     watch(
       () => props.isSelected,
       () => {
@@ -45,11 +46,13 @@ export default defineComponent({
       }
     )
 
-    const handleClick = () => {
-      if (props.isSelected) {
-        status.value = 'edit'
+    watch(status, (v) => {
+      if (v === 'edit') {
+        document.addEventListener('click', handleDocumentClick, { capture: true })
+      } else {
+        document.removeEventListener('click', handleDocumentClick, { capture: true })
       }
-    }
+    })
 
     const typeName = computed(() => {
       if (!props.showType) return ''
@@ -84,13 +87,35 @@ export default defineComponent({
       return htmlText
     })
 
-    return { slots, handleClick, status, tagTitle }
+    function handleClick(e) {
+      if (props.isSelected && status.value === 'preview') {
+        e.stopPropagation()
+        status.value = 'edit'
+      }
+    }
+
+    function handleDocumentClick(e) {
+      const richEditorDOM = moduleTitleRef.value.querySelector('.rich-editor')
+      const isUploadImage = e.target.type === 'file' && e.target.tagName.toLowerCase() === 'input' // 富文本上传图片点击事件触发到input file 元素上了, 该元素插入到body了
+      const isClickRichEditor = richEditorDOM?.contains(e.target) || isUploadImage
+
+      if (status.value === 'edit' && richEditorDOM && !isClickRichEditor) {
+        // 监听编辑状态时点击非编辑区域
+        status.value = 'preview'
+      }
+    }
+
+    return { slots, handleClick, status, tagTitle, moduleTitleRef }
   },
   render() {
     const { isRequired, indexNumber, slots, status, tagTitle } = this
 
     return (
-      <div class={['module-title', isRequired ? 'is-required' : '']} onClick={this.handleClick}>
+      <div
+        ref="moduleTitleRef"
+        class={['module-title', isRequired ? 'is-required' : '']}
+        onClick={this.handleClick}
+      >
         {isRequired && <i class="module-title-required">*</i>}
         <div class="module-content">
           {this.showIndex && <span class="index"> {indexNumber}.</span>}

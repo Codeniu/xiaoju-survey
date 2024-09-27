@@ -29,11 +29,9 @@
 
 <br />
 
-&ensp;&ensp;XIAOJUSURVEY is a lightweight, secure questionnaire system foundation that provides one-stop product-level solutions for individuals and enterprises, quickly meeting various online survey scenarios.
+&ensp;&ensp;XIAOJUSURVEY is an enterprises form builder and analytics platform to create questionnaires, exams, polls, quizzes, and analyze data online.
 
 &ensp;&ensp;The internal system has accumulated over 40 question types and more than 100 selected templates, suitable for market research, customer satisfaction surveys, online exams, voting, reporting, evaluations, and many other scenarios. In terms of data capabilities, it has been honed through hundreds of millions of iterations, resulting in the ability to provide online reports with per-question statistics, cross-analysis, and multi-channel analysis, quickly meeting professional analysis needs.
-
-&ensp;&ensp;The open-source project focuses on building a survey foundation, constructing around platform capabilities, engineering structure, and development systems, allowing everyone to 「quickly」 create their own 「exclusive」 questionnaire system: [quickly understanding the ecological development philosophy](https://xiaojusurvey.didi.cn/docs/next/community/%E7%94%9F%E6%80%81%E5%BB%BA%E8%AE%BE).
 
 # Function Overview
 
@@ -45,19 +43,19 @@
 
 - Data Security: Encrypted transmission, data masking, etc.
 
-> For more comprehensive features, please refer to the official Feature documentation.
+> For more comprehensive features, please refer to the [documentation](https://xiaojusurvey.didi.cn/docs/next/document/%E4%BA%A7%E5%93%81%E6%89%8B%E5%86%8C/%E5%8A%9F%E8%83%BD%E4%BB%8B%E7%BB%8D/%E5%9F%BA%E7%A1%80%E6%B5%81%E7%A8%8B).
 
-<img src="https://github.com/didi/xiaoju-survey/assets/16012672/dd427471-368d-49d9-bc44-13c34d84e3be"  width="700" />
+<img src="https://github.com/didi/xiaoju-survey/assets/16012672/508ce30f-0ae8-4f5f-84a7-e96de8238a7f"  width="700" />
 
 _**(Both individual and enterprise users can quickly build survey solutions specific to their fields.)**_
 
 # Technology
 
-Web: Vue3 + ElementPlus; Multi-end rendering for C-end (under construction, application for co-construction welcome).
+Web: Vue3 + ElementPlus; Multi-end rendering for C-end (planning).
 
-Server: Nestjs + MongoDB; Java (under construction).
+Server: Nestjs + MongoDB; Java ([under construction](https://github.com/didi/xiaoju-survey/issues/306)).
 
-Intelligent Foundation: (under construction).
+Intelligent Foundation: (planning).
 
 # Project Advantages
 
@@ -145,12 +143,11 @@ npm run local
 
 ### Option 2: (Recommended for Production)
 
-#### 1.Start Database
+#### 1.Configure Database
 
-> The project uses MongoDB: [MongoDB Installation Guide](https://xiaojusurvey.didi.cn/docs/next/document/%E6%A6%82%E8%BF%B0/%E6%95%B0%E6%8D%AE%E5%BA%93#%E5%AE%89%E8%A3%85)
+> The project uses MongoDB: [MongoDB Guide](https://xiaojusurvey.didi.cn/docs/next/document/%E6%A6%82%E8%BF%B0/%E6%95%B0%E6%8D%AE%E5%BA%93)
 
-- Configure the database, check MongoDB configuration.
-- Start local database, check MongoDB startup.
+Configure the database, check MongoDB configuration.
 
 #### 2.Install Dependencies
 
@@ -194,17 +191,17 @@ Create and publish a questionnaire.
 
 <br /><br />
 
-## QQ Group
-
-The official group will release the latest project news, construction plans, and community activities. Welcome to join:
-
-[<img src="https://img-hxy021.didistatic.com/static/starimg/img/iJUmLIHKV21700192846057.png"  width="210" />](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=P61UJI_q8AzizyBLGOm-bUvzNrUnSQq-&authKey=yZFtL9biGB5yiIME3%2Bi%2Bf6XMOdTNiuf0pCIaviEEAIryySNzVy6LJ4xl7uHdEcrM&noverify=0&group_code=920623419)
-
 ## WeChat Group
 
 The official group will release the latest project news, construction plans, and community activities. Any questions and cooperation can contact the assistant:
 
 <img src="https://img-hxy021.didistatic.com/static/starimg/img/KXKvc7sjHz1700061188156.png"  width="200" />
+
+## QQ Group
+
+The official group will release the latest project news, construction plans, and community activities. Welcome to join:
+
+[<img src="https://img-hxy021.didistatic.com/static/starimg/img/iJUmLIHKV21700192846057.png"  width="210" />](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=P61UJI_q8AzizyBLGOm-bUvzNrUnSQq-&authKey=yZFtL9biGB5yiIME3%2Bi%2Bf6XMOdTNiuf0pCIaviEEAIryySNzVy6LJ4xl7uHdEcrM&noverify=0&group_code=920623419)
 
 ## Star
 
@@ -218,16 +215,11 @@ If you use this project, please leave feedback:[I'm using](https://github.com/di
 
 If you want to become a contributor or expand your technical stack, please check: [Contributor Guide](https://xiaojusurvey.didi.cn/docs/next/share/%E5%A6%82%E4%BD%95%E5%8F%82%E4%B8%8E%E8%B4%A1%E7%8C%AE). Your participation is our greatest honor.
 
-## Feature
+## Future Tasks
 
-Pay attention to weekly construction updates: [Official Feature](https://github.com/didi/xiaoju-survey/issues/45)
+1. [Official Feature](https://github.com/didi/xiaoju-survey/issues/45)
+2. [WIP](https://github.com/didi/xiaoju-survey/labels/WIP)
 
 ## CHANGELOG
 
 Follow major changes: [MAJOR CHANGELOG](https://github.com/didi/xiaoju-survey/issues/48)
-
-## Article Sharing
-
-1、[JueJin](https://juejin.cn/user/3705833332160473/posts)、2、[InfoQ](https://www.infoq.cn/profile/7E08AC616A07B2/publish)
-
-[Welcome to contribute.](https://xiaojusurvey.didi.cn/docs/next/article/%E7%AE%80%E4%BB%8B)

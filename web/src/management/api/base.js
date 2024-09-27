@@ -1,7 +1,7 @@
 import axios from 'axios'
-import store from '@/management/store/index'
 import router from '@/management/router/index'
 import { get as _get } from 'lodash-es'
+import { useUserStore } from '../stores/user'
 
 export const CODE_MAP = {
   SUCCESS: 200,
@@ -36,9 +36,10 @@ instance.interceptors.response.use(
 )
 
 instance.interceptors.request.use((config) => {
-  const hasLogined = _get(store, 'state.user.hasLogined')
-  const token = _get(store, 'state.user.userInfo.token')
-  if (hasLogined && token) {
+  const userStore = useUserStore()
+  const hasLogin = _get(userStore, 'hasLogin')
+  const token = _get(userStore, 'userInfo.token')
+  if (hasLogin && token) {
     if (!config.headers) {
       config.headers = {}
     }

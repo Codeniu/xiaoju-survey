@@ -88,10 +88,17 @@ export interface MsgContent {
   msg_9004: string;
 }
 
+export interface JumpConfig {
+  type: string;
+  link: string;
+  buttonText?: string;
+}
+
 export interface SubmitConf {
   submitTitle: string;
   confirmAgain: ConfirmAgain;
   msgContent: MsgContent;
+  jumpConfig?: JumpConfig;
 }
 
 // 白名单类型
@@ -112,7 +119,7 @@ export enum MemberType {
 }
 
 export interface BaseConf {
-  begTime: string;
+  beginTime: string;
   endTime: string;
   answerBegTime: string;
   answerEndTime: string;

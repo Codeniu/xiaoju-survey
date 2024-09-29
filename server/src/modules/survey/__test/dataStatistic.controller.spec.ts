@@ -233,7 +233,7 @@ describe('DataStatisticController', () => {
             },
           },
           baseConf: {
-            begTime: '2024-05-31 20:31:36',
+            beginTime: '2024-05-31 20:31:36',
             endTime: '2034-05-31 20:31:36',
             language: 'chinese',
             showVoteProcess: 'allow',
@@ -275,6 +275,11 @@ describe('DataStatisticController', () => {
               again_text: '确认要提交吗？',
             },
             link: '',
+            jumpConfig: {
+              type: 'link',
+              link: '',
+              buttonText: '',
+            },
           },
           logicConf: {
             showLogicConf: [],
